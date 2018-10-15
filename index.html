@@ -5,13 +5,13 @@
     var node = document.getElementById('elm');
     var app = Elm.Main.embed(node);
 
-    var displaySuggestions = function(predictions) {
-      app.ports.placeSuggestion.send(predictions);
-    };
-
     app.ports.predict.subscribe(function(text) {
-      var service = new google.maps.places.AutocompleteService();  
-      service.getPlacePredictions({ input: text, componentRestrictions: {country: "de"}, types: ['address'] }, displaySuggestions);
+      if(!text) { return; }
+      var service = new google.maps.places.AutocompleteService();
+      var options = { input: text, componentRestrictions: {country: "de"}, types: ['address'] }
+      service.getPlacePredictions(options, function(predictions) {
+        app.ports.placeSuggestion.send(predictions);
+      });
     });
 
 </script>

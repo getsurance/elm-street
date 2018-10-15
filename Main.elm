@@ -4,19 +4,18 @@ import Html exposing (Html, Attribute, button, div, text, program, input)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import Json.Decode
-import AutocompletePrediction
-
-
--- MODEL
+import AutocompletePrediction exposing (AutocompletePrediction)
 
 
 type alias Model =
-    { streetAddress : String }
+    { streetAddress : String
+    , suggestions : List AutocompletePrediction
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "", Cmd.none )
+    ( Model "" [], Cmd.none )
 
 
 port predict : String -> Cmd msg
@@ -33,9 +32,15 @@ type Msg
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ placeholder "Address", value model.streetAddress, onInput ChangeAddr ] []
-        , div [] [ text "Input address" ]
+        [ div [] [ text "Input address" ]
+        , input [ placeholder "Address", value model.streetAddress, onInput ChangeAddr ] []
+        , div [] (List.map addressView model.suggestions)
         ]
+
+
+addressView : AutocompletePrediction -> Html Msg
+addressView suggestion =
+    div [] [ text suggestion.description ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,20 +53,18 @@ update msg model =
             let
                 decodedResult =
                     Json.Decode.decodeValue (Json.Decode.list AutocompletePrediction.decodeAutocompletePrediction) predictions
-
-                _ =
-                    Debug.log "decoder" decodedResult
             in
-                model ! []
+                case decodedResult of
+                    Ok suggestions ->
+                        { model | suggestions = suggestions } ! []
+
+                    Err _ ->
+                        model ! []
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     placeSuggestion NewSuggestion
-
-
-
--- MAIN
 
 
 main : Program Never Model Msg
