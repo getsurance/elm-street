@@ -1,0 +1,17 @@
+<div id="elm"></div>
+<script src="main.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTGFwI-OXNVmj6R2iVLjipaUotFMyyDyo&libraries=places"></script>
+<script>    
+    var node = document.getElementById('elm');
+    var app = Elm.Main.embed(node);
+
+    var displaySuggestions = function(predictions) {
+      app.ports.placeSuggestion.send(predictions);
+    };
+
+    app.ports.predict.subscribe(function(text) {
+      var service = new google.maps.places.AutocompleteService();  
+      service.getPlacePredictions({ input: text, componentRestrictions: {country: "de"}, types: ['address'] }, displaySuggestions);
+    });
+
+</script>
