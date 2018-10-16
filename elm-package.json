@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "Types for Google Places Autocomplete javascript api",
-    "repository": "https://github.com/getsurance/elm-street",
+    "repository": "https://github.com/getsurance/elm-street.git",
     "license": "BSD3",
     "source-directories": [
         "."

@@ -9,8 +9,18 @@
       if(!text) { return; }
       var service = new google.maps.places.AutocompleteService();
       var options = { input: text, componentRestrictions: {country: "de"}, types: ['address'] }
-      service.getPlacePredictions(options, function(predictions) {
+      service.getPlacePredictions(options, function(predictions, status) {
         app.ports.placeSuggestion.send(predictions);
+      });
+    });
+
+
+    app.ports.getInformation.subscribe(function(text) {
+      var request = { placeId: text };
+      var service = new google.maps.places.PlacesService(document.createElement('div'));
+      service.getDetails(request, function(place, status) {
+        console.log(JSON.stringify(place));
+        app.ports.addressDetails.send(JSON.stringify(place));
       });
     });
 

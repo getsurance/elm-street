@@ -2,31 +2,41 @@ port module Main exposing (..)
 
 import Html exposing (Html, Attribute, button, div, text, program, input)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 import Json.Decode
 import AutocompletePrediction exposing (AutocompletePrediction)
+import Place exposing (Place)
 
 
 type alias Model =
     { streetAddress : String
     , suggestions : List AutocompletePrediction
+    , selectedPlace : Maybe Place
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" [], Cmd.none )
+    ( Model "" [] Nothing, Cmd.none )
 
 
 port predict : String -> Cmd msg
 
 
+port getInformation : String -> Cmd msg
+
+
 port placeSuggestion : (Json.Decode.Value -> msg) -> Sub msg
+
+
+port addressDetails : (String -> msg) -> Sub msg
 
 
 type Msg
     = ChangeAddr String
     | NewSuggestion Json.Decode.Value
+    | DidSelectAddress String
+    | AddressDetails String
 
 
 view : Model -> Html Msg
@@ -40,7 +50,7 @@ view model =
 
 addressView : AutocompletePrediction -> Html Msg
 addressView suggestion =
-    div [] [ text suggestion.description ]
+    div [ onClick (DidSelectAddress suggestion.placeId) ] [ text suggestion.description ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,6 +58,21 @@ update msg model =
     case msg of
         ChangeAddr text ->
             ( { model | streetAddress = text }, predict text )
+
+        DidSelectAddress placeId ->
+            model ! [ getInformation placeId ]
+
+        AddressDetails placeJson ->
+            let
+                decodedResult =
+                    Debug.log "place" (Json.Decode.decodeString Place.decodePlace placeJson)
+            in
+                case decodedResult of
+                    Ok place ->
+                        { model | selectedPlace = Just place } ! []
+
+                    Err _ ->
+                        model ! []
 
         NewSuggestion predictions ->
             let
@@ -64,7 +89,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    placeSuggestion NewSuggestion
+    Sub.batch [ placeSuggestion NewSuggestion, addressDetails AddressDetails ]
 
 
 main : Program Never Model Msg
