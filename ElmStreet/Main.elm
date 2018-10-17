@@ -4,8 +4,8 @@ import Html exposing (Html, Attribute, button, div, text, program, input)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Json.Decode as Decode
-import ElmStreet.AutocompletePrediction as AutocompletePrediction exposing (AutocompletePrediction)
-import ElmStreet.Place as Place exposing (Place)
+import ElmStreet.AutocompletePrediction exposing (AutocompletePrediction)
+import ElmStreet.Place exposing (Place)
 
 
 type alias Model =
@@ -64,7 +64,7 @@ update msg model =
         AddressDetails placeJson ->
             let
                 decodedResult =
-                    Decode.decodeString Place.decodePlace placeJson
+                    Decode.decodeString ElmStreet.Place.decoder placeJson
             in
                 case decodedResult of
                     Ok place ->
@@ -76,7 +76,7 @@ update msg model =
         AddressPredictions predictions ->
             let
                 decodedResult =
-                    Decode.decodeValue (Decode.list AutocompletePrediction.decodeAutocompletePrediction) predictions
+                    Decode.decodeValue (Decode.list ElmStreet.AutocompletePrediction.decoder) predictions
             in
                 case decodedResult of
                     Ok suggestions ->

@@ -7,39 +7,27 @@ Types for Google Places Autocomplete javascript api.
 
 Create ports to comunicate with AutocompleteService:
 ```elm
-port predict : String -> Cmd msg
+port predictAddress : String -> Cmd msg
 
 
-port placeSuggestion : (Json.Decode.Value -> msg) -> Sub msg
+port addressPredictions : (Json.Decode.Value -> msg) -> Sub msg
 ```
 
 ```javascript
-    app.ports.predict.subscribe(function(text) {
-      if(!text) { return; }
-      var service = new google.maps.places.AutocompleteService();
-      var options = { input: text, componentRestrictions: {country: "de"}, types: ['address'] }
-      service.getPlacePredictions(options, function(predictions, status) {
-        app.ports.placeSuggestion.send(predictions);
-      });
-    });
+app.ports.predictAddress.subscribe(function(text) {
+  if(!text) { return; }
+  var service = new google.maps.places.AutocompleteService();
+  var options = { input: text, componentRestrictions: {country: "de"}, types: ['address'] }
+  service.getPlacePredictions(options, function(predictions, status) {
+    app.ports.addressPredictions.send(predictions);
+  });
+});
 ```
 
 Decode prediction using elm-street inside Elm:
 ```elm
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        NewSuggestion predictions ->
-            let
-                decodedResult =
-                    Json.Decode.decodeValue (Json.Decode.list AutocompletePrediction.decodeAutocompletePrediction) predictions
-            in
-                case decodedResult of
-                    Ok suggestions ->
-                        { model | suggestions = suggestions } ! []
-
-                    Err _ ->
-                        model ! []
+decodedResult =
+    Json.Decode.decodeValue (Json.Decode.list ElmStreet.AutocompletePrediction.decoder) predictions
 ```
 
 ## Examples

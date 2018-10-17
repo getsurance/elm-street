@@ -1,4 +1,4 @@
-module ElmStreet.Place exposing (Place, LatLng, LatLngBounds, AddressComponent, Geometry, decodePlace)
+module ElmStreet.Place exposing (Place, LatLng, LatLngBounds, AddressComponent, Geometry, decoder)
 
 {-| Types for Google places api
 
@@ -10,7 +10,7 @@ module ElmStreet.Place exposing (Place, LatLng, LatLngBounds, AddressComponent, 
 
 # Decoding
 
-@docs decodePlace
+@docs decoder
 
 -}
 
@@ -89,13 +89,13 @@ type alias AddressComponent =
     }
 
 
-{-| Decode objects of type [PlaceResult][pr]
+{-| Decoder for objects of type [PlaceResult][pr]
 
 [pr]: https://developers.google.com/maps/documentation/javascript/reference/places-service#PlaceResult
 
 -}
-decodePlace : Json.Decode.Decoder Place
-decodePlace =
+decoder : Json.Decode.Decoder Place
+decoder =
     Json.Decode.Pipeline.decode Place
         |> Json.Decode.Pipeline.required "address_components" (Json.Decode.list decodeAddressComponent)
         |> Json.Decode.Pipeline.required "adr_address" (Json.Decode.string)
