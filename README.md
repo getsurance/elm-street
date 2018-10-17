@@ -30,6 +30,11 @@ decodedResult =
     Json.Decode.decodeValue (Json.Decode.list ElmStreet.AutocompletePrediction.decoder) predictions
 ```
 
+## Policies
+
+Please follow the Google Places API when using this package:
+<https://developers.google.com/places/web-service/policies>
+
 ## Examples
 
 This repo contains an example showing how to use the package.
