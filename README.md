@@ -14,15 +14,14 @@ port placeSuggestion : (Json.Decode.Value -> msg) -> Sub msg
 ```
 
 ```javascript
-app.ports.predict.subscribe(function(text) {
-	if(!text) { return; }
-	var service = new google.maps.places.AutocompleteService();
-	var options = { input: text, componentRestrictions: {country: "de"}, types: ['address'] }
-	service.getPlacePredictions(options, function(predictions) {
-		app.ports.placeSuggestion.send(predictions);
-	});
-});
-
+    app.ports.predict.subscribe(function(text) {
+      if(!text) { return; }
+      var service = new google.maps.places.AutocompleteService();
+      var options = { input: text, componentRestrictions: {country: "de"}, types: ['address'] }
+      service.getPlacePredictions(options, function(predictions, status) {
+        app.ports.placeSuggestion.send(predictions);
+      });
+    });
 ```
 
 Decode prediction using elm-street inside Elm:
@@ -49,5 +48,9 @@ This repo contains an example showing how to use the package.
 
 Just compile Main.elm, serve and open index.html.
 
-
+## Todo
+- [x] Decodable Json inside Elm
+- [ ] Decode address components into fixed types instead of a list, making impossible states impossible
+- [ ] Add a autocomplete dropdown as UI element
+- [ ] Pass service configuration from Elm
 
