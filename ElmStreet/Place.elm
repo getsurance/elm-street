@@ -19,7 +19,7 @@ import Json.Decode
 import Json.Decode.Pipeline
 
 
-{-| Google object [PlaceResult][pr]
+{-| Type alias for [PlaceResult][pr]
 
 [pr]: https://developers.google.com/maps/documentation/javascript/reference/places-service#PlaceResult
 
@@ -42,7 +42,7 @@ type alias Place =
     }
 
 
-{-| [LatLng][ll] coordinates
+{-| Type alias for [LatLng][ll] coordinates
 
 [ll]: https://developers.google.com/maps/documentation/javascript/reference/coordinates#LatLng
 
@@ -53,7 +53,7 @@ type alias LatLng =
     }
 
 
-{-| [LatLngBouns][llb] coordinates
+{-| Type alias for [LatLngBouns][llb]
 
 [llb]: https://developers.google.com/maps/documentation/javascript/reference/coordinates#LatLngBounds
 
@@ -66,7 +66,7 @@ type alias LatLngBounds =
     }
 
 
-{-| Google object [PlaceGeometry][pg]
+{-| Type alias for [PlaceGeometry][pg]
 
 [pg]: https://developers.google.com/maps/documentation/javascript/reference/places-service#PlaceGeometry
 
@@ -77,7 +77,7 @@ type alias Geometry =
     }
 
 
-{-| Google object [Address Component][ac]
+{-| Type alias for [GeocoderAddressComponent][ac]
 
 [ac]: https://developers.google.com/maps/documentation/javascript/reference/geocoder#GeocoderAddressComponent
 
@@ -89,7 +89,7 @@ type alias AddressComponent =
     }
 
 
-{-| Pass through ports an object of type [PlaceResult][pr]
+{-| Decode objects of type [PlaceResult][pr]
 
 [pr]: https://developers.google.com/maps/documentation/javascript/reference/places-service#PlaceResult
 

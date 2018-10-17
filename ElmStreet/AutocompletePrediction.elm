@@ -70,7 +70,7 @@ type alias PredictionSubstring =
     }
 
 
-{-| Pass through ports an object of type [AutcompletePrediction][pr]
+{-| Decode objects of type [AutcompletePrediction][ap]
 
 [ap]: https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletePrediction
 
