@@ -49,8 +49,8 @@ This repo contains an example showing how to use the package.
 Just compile Main.elm, serve and open index.html.
 
 ## Todo
-- [x] Decodable Json inside Elm
-- [ ] Decode address components into fixed types instead of a list, making impossible states impossible
+- [x] Create decoders for autocomplete response object inside Elm
+- [ ] Decode AddressComponents into fixed types instead of a list, making impossible states impossible
 - [ ] Add a autocomplete dropdown as UI element
-- [ ] Pass service configuration from Elm
+- [ ] Pass service options from Elm to Google api
 
