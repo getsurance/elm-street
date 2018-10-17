@@ -1,12 +1,12 @@
 {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "summary": "Types for Google Places Autocomplete javascript api",
     "repository": "https://github.com/getsurance/elm-street.git",
     "license": "BSD3",
     "source-directories": [
         "."
     ],
-    "exposed-modules": ["AutocompletePrediction", "Place"],
+    "exposed-modules": ["ElmStreet.AutocompletePrediction", "ElmStreet.Place"],
     "dependencies": {
         "elm-lang/core": "5.1.1 <= v < 6.0.0",
         "elm-lang/html": "2.0.0 <= v < 3.0.0",

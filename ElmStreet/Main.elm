@@ -1,32 +1,31 @@
-port module Main exposing (..)
+port module ElmStreet.Main exposing (..)
 
 import Html exposing (Html, Attribute, button, div, text, program, input)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
-import Json.Decode
-import AutocompletePrediction exposing (AutocompletePrediction)
-import Place exposing (Place)
+import Json.Decode as Decode
+import ElmStreet.AutocompletePrediction as AutocompletePrediction exposing (AutocompletePrediction)
+import ElmStreet.Place as Place exposing (Place)
 
 
 type alias Model =
     { streetAddress : String
     , suggestions : List AutocompletePrediction
-    , selectedPlace : Maybe Place
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" [] Nothing, Cmd.none )
+    ( Model "" [], Cmd.none )
 
 
-port predict : String -> Cmd msg
+port predictAddress : String -> Cmd msg
 
 
-port getInformation : String -> Cmd msg
+port addressPredictions : (Decode.Value -> msg) -> Sub msg
 
 
-port placeSuggestion : (Json.Decode.Value -> msg) -> Sub msg
+port getAddressDetails : String -> Cmd msg
 
 
 port addressDetails : (String -> msg) -> Sub msg
@@ -34,7 +33,7 @@ port addressDetails : (String -> msg) -> Sub msg
 
 type Msg
     = ChangeAddr String
-    | NewSuggestion Json.Decode.Value
+    | AddressPredictions Decode.Value
     | DidSelectAddress String
     | AddressDetails String
 
@@ -57,27 +56,27 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ChangeAddr text ->
-            ( { model | streetAddress = text }, predict text )
+            ( { model | streetAddress = text }, predictAddress text )
 
         DidSelectAddress placeId ->
-            model ! [ getInformation placeId ]
+            model ! [ getAddressDetails placeId ]
 
         AddressDetails placeJson ->
             let
                 decodedResult =
-                    Debug.log "place" (Json.Decode.decodeString Place.decodePlace placeJson)
+                    Decode.decodeString Place.decodePlace placeJson
             in
                 case decodedResult of
                     Ok place ->
-                        { model | selectedPlace = Just place } ! []
+                        { model | streetAddress = place.formattedAddress } ! []
 
                     Err _ ->
                         model ! []
 
-        NewSuggestion predictions ->
+        AddressPredictions predictions ->
             let
                 decodedResult =
-                    Json.Decode.decodeValue (Json.Decode.list AutocompletePrediction.decodeAutocompletePrediction) predictions
+                    Decode.decodeValue (Decode.list AutocompletePrediction.decodeAutocompletePrediction) predictions
             in
                 case decodedResult of
                     Ok suggestions ->
@@ -89,7 +88,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [ placeSuggestion NewSuggestion, addressDetails AddressDetails ]
+    Sub.batch [ addressPredictions AddressPredictions, addressDetails AddressDetails ]
 
 
 main : Program Never Model Msg
