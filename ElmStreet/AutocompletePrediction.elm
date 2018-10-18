@@ -1,4 +1,4 @@
-module ElmStreet.AutocompletePrediction exposing (AutocompletePrediction, StructuredFormatting, PredictionTerm, PredictionSubstring, decoder)
+module ElmStreet.AutocompletePrediction exposing (AutocompletePrediction, StructuredFormatting, PredictionTerm, PredictionSubstring, decoder, decodeList)
 
 {-| Type aliases for Google Autocomplete api
 
@@ -10,7 +10,7 @@ module ElmStreet.AutocompletePrediction exposing (AutocompletePrediction, Struct
 
 # Decoding
 
-@docs decoder
+@docs decoder, decodeList
 
 -}
 
@@ -70,7 +70,17 @@ type alias PredictionSubstring =
     }
 
 
-{-| Decodee for objects of type [AutcompletePrediction][ap]
+{-| Decoder for list of [AutcompletePrediction][ap]
+
+[ap]: https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletePrediction
+
+-}
+decodeList : Json.Decode.Decoder (List AutocompletePrediction)
+decodeList =
+    Json.Decode.list decoder
+
+
+{-| Decoder of [AutcompletePrediction][ap]
 
 [ap]: https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletePrediction
 

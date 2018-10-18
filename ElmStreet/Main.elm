@@ -85,7 +85,7 @@ update msg model =
         AddressPredictions predictions ->
             let
                 decodedResult =
-                    Decode.decodeValue (Decode.list ElmStreet.AutocompletePrediction.decoder) predictions
+                    Decode.decodeValue ElmStreet.AutocompletePrediction.decodeList predictions
             in
                 case decodedResult of
                     Ok suggestions ->

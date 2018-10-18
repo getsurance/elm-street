@@ -141,6 +141,37 @@ type ComponentType
     | OtherComponent
 
 
+{-| Decoder for objects of type [PlaceResult][pr]
+
+[pr]: https://developers.google.com/maps/documentation/javascript/reference/places-service#PlaceResult
+
+-}
+decoder : Json.Decode.Decoder Place
+decoder =
+    Json.Decode.Pipeline.decode Place
+        |> Json.Decode.Pipeline.required "address_components" (Json.Decode.list decodeAddressComponent)
+        |> Json.Decode.Pipeline.required "adr_address" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "formatted_address" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "geometry" (decodeGeometry)
+        |> Json.Decode.Pipeline.required "icon" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "id" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "name" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "place_id" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "reference" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "scope" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "types" (Json.Decode.list Json.Decode.string)
+        |> Json.Decode.Pipeline.required "url" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "utc_offset" (Json.Decode.int)
+        |> Json.Decode.Pipeline.required "vicinity" (Json.Decode.string)
+
+
+{-| Helper function to name by components type.
+-}
+getComponentName : Place -> ComponentType -> Maybe String
+getComponentName place componentType =
+    place.addressComponents |> List.filter (\c -> List.member componentType c.types) |> List.head |> Maybe.map .long_name
+
+
 componentTypeList : List ( String, ComponentType )
 componentTypeList =
     [ ( "street_address", StreetAddress )
@@ -181,37 +212,6 @@ componentTypeList =
     , ( "transit_station", TransitStation )
     , ( "postal_code_suffix", PostalCodeSuffix )
     ]
-
-
-{-| Decoder for objects of type [PlaceResult][pr]
-
-[pr]: https://developers.google.com/maps/documentation/javascript/reference/places-service#PlaceResult
-
--}
-decoder : Json.Decode.Decoder Place
-decoder =
-    Json.Decode.Pipeline.decode Place
-        |> Json.Decode.Pipeline.required "address_components" (Json.Decode.list decodeAddressComponent)
-        |> Json.Decode.Pipeline.required "adr_address" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "formatted_address" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "geometry" (decodeGeometry)
-        |> Json.Decode.Pipeline.required "icon" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "id" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "name" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "place_id" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "reference" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "scope" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "types" (Json.Decode.list Json.Decode.string)
-        |> Json.Decode.Pipeline.required "url" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "utc_offset" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "vicinity" (Json.Decode.string)
-
-
-{-| Helper function to name by components type.
--}
-getComponentName : Place -> ComponentType -> Maybe String
-getComponentName place componentType =
-    place.addressComponents |> List.filter (\c -> List.member componentType c.types) |> List.head |> Maybe.map .long_name
 
 
 decodeAddressComponent : Json.Decode.Decoder AddressComponent
