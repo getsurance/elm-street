@@ -1,19 +1,25 @@
-module ElmStreet.Place exposing (Place, LatLng, LatLngBounds, AddressComponent, Geometry, decoder)
+module ElmStreet.Place exposing (Place, LatLng, LatLngBounds, AddressComponent, ComponentType(..), Geometry, getComponentName, decoder)
 
 {-| Types for Google places api
 
 
 # Type aliases
 
-@docs Place, LatLng, LatLngBounds, AddressComponent, Geometry
+@docs Place, LatLng, LatLngBounds, AddressComponent, Geometry, ComponentType
 
 
 # Decoding
 
 @docs decoder
 
+
+# Helper
+
+@docs getComponentName
+
 -}
 
+import Dict exposing (Dict)
 import Json.Encode
 import Json.Decode
 import Json.Decode.Pipeline
@@ -85,8 +91,96 @@ type alias Geometry =
 type alias AddressComponent =
     { long_name : String
     , short_name : String
-    , types : List String
+    , types : List ComponentType
     }
+
+
+{-| [Types][ty] for address component
+
+[ty]: https://developers.google.com/maps/documentation/geocoding/intro#Types
+
+-}
+type ComponentType
+    = StreetAddress
+    | Route
+    | Intersection
+    | Political
+    | Country
+    | AdministrativeAreaLevel1
+    | AdministrativeAreaLevel2
+    | AdministrativeAreaLevel3
+    | AdministrativeAreaLevel4
+    | AdministrativeAreaLevel5
+    | ColloquialArea
+    | Locality
+    | Sublocality
+    | SublocalityLevel1
+    | SublocalityLevel2
+    | SublocalityLevel3
+    | SublocalityLevel4
+    | SublocalityLevel5
+    | Neighborhood
+    | Premise
+    | Subpremise
+    | PostalCode
+    | NaturalFeature
+    | Airport
+    | Park
+    | PostBox
+    | StreetNumber
+    | Floor
+    | Room
+    | Establishment
+    | PointOfInterest
+    | Parking
+    | PostalTown
+    | BusStation
+    | TrainStation
+    | TransitStation
+    | PostalCodeSuffix
+    | OtherComponent
+
+
+componentTypeList : List ( String, ComponentType )
+componentTypeList =
+    [ ( "street_address", StreetAddress )
+    , ( "route", Route )
+    , ( "intersection", Intersection )
+    , ( "political", Political )
+    , ( "country", Country )
+    , ( "administrative_area_level_1", AdministrativeAreaLevel1 )
+    , ( "administrative_area_level_2", AdministrativeAreaLevel2 )
+    , ( "administrative_area_level_3", AdministrativeAreaLevel3 )
+    , ( "administrative_area_level_4", AdministrativeAreaLevel4 )
+    , ( "administrative_area_level_5", AdministrativeAreaLevel5 )
+    , ( "colloquial_area", ColloquialArea )
+    , ( "locality", Locality )
+    , ( "sublocality", Sublocality )
+    , ( "sublocality_level_1", SublocalityLevel1 )
+    , ( "sublocality_level_2", SublocalityLevel2 )
+    , ( "sublocality_level_3", SublocalityLevel3 )
+    , ( "sublocality_level_4", SublocalityLevel4 )
+    , ( "sublocality_level_5", SublocalityLevel5 )
+    , ( "neighborhood", Neighborhood )
+    , ( "premise", Premise )
+    , ( "subpremise", Subpremise )
+    , ( "postal_code", PostalCode )
+    , ( "natural_feature", NaturalFeature )
+    , ( "airport", Airport )
+    , ( "park", Park )
+    , ( "post_box", PostBox )
+    , ( "street_number", StreetNumber )
+    , ( "floor", Floor )
+    , ( "room", Room )
+    , ( "establishment", Establishment )
+    , ( "point_of_interest", PointOfInterest )
+    , ( "parking", Parking )
+    , ( "postal_town", PostalTown )
+    , ( "bus_station", BusStation )
+    , ( "train_station", TrainStation )
+    , ( "transit_station", TransitStation )
+    , ( "postal_code_suffix", PostalCodeSuffix )
+    ]
 
 
 {-| Decoder for objects of type [PlaceResult][pr]
@@ -113,12 +207,19 @@ decoder =
         |> Json.Decode.Pipeline.required "vicinity" (Json.Decode.string)
 
 
+{-| Helper function to name by components type.
+-}
+getComponentName : Place -> ComponentType -> Maybe String
+getComponentName place componentType =
+    place.addressComponents |> List.filter (\c -> List.member componentType c.types) |> List.head |> Maybe.map .long_name
+
+
 decodeAddressComponent : Json.Decode.Decoder AddressComponent
 decodeAddressComponent =
     Json.Decode.Pipeline.decode AddressComponent
         |> Json.Decode.Pipeline.required "long_name" (Json.Decode.string)
         |> Json.Decode.Pipeline.required "short_name" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "types" (Json.Decode.list Json.Decode.string)
+        |> Json.Decode.Pipeline.required "types" typeListDecoder
 
 
 decodeLatLng : Json.Decode.Decoder LatLng
@@ -142,3 +243,29 @@ decodeGeometry =
     Json.Decode.Pipeline.decode Geometry
         |> Json.Decode.Pipeline.required "location" (decodeLatLng)
         |> Json.Decode.Pipeline.required "viewport" (decodeLatLngBounds)
+
+
+typeListDecoder : Json.Decode.Decoder (List ComponentType)
+typeListDecoder =
+    Json.Decode.list typeDecoder
+
+
+typeDecoder : Json.Decode.Decoder ComponentType
+typeDecoder =
+    Json.Decode.string |> Json.Decode.andThen mapComponentType
+
+
+componentTypeMap : Dict String ComponentType
+componentTypeMap =
+    Dict.fromList componentTypeList
+
+
+mapComponentType : String -> Json.Decode.Decoder ComponentType
+mapComponentType =
+    Json.Decode.succeed << stringToComponentType
+
+
+stringToComponentType : String -> ComponentType
+stringToComponentType str =
+    Dict.get str componentTypeMap
+        |> Maybe.withDefault OtherComponent

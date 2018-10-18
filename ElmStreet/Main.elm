@@ -5,18 +5,19 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Json.Decode as Decode
 import ElmStreet.AutocompletePrediction exposing (AutocompletePrediction)
-import ElmStreet.Place exposing (Place)
+import ElmStreet.Place exposing (Place, ComponentType(..), getComponentName)
 
 
 type alias Model =
     { streetAddress : String
     , suggestions : List AutocompletePrediction
+    , selectedPlace : Maybe Place
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" [], Cmd.none )
+    ( Model "" [] Nothing, Cmd.none )
 
 
 port predictAddress : String -> Cmd msg
@@ -41,7 +42,15 @@ type Msg
 view : Model -> Html Msg
 view model =
     div []
-        [ div [] [ text "Input address" ]
+        [ div []
+            [ case model.selectedPlace of
+                Just place ->
+                    getComponentName place Locality |> Maybe.withDefault "No city for this place" |> text
+
+                Nothing ->
+                    text "Select a place"
+            ]
+        , div [] [ text "Input address" ]
         , input [ placeholder "Address", value model.streetAddress, onInput ChangeAddr ] []
         , div [] (List.map addressView model.suggestions)
         ]
@@ -68,7 +77,7 @@ update msg model =
             in
                 case decodedResult of
                     Ok place ->
-                        { model | streetAddress = place.formattedAddress } ! []
+                        { model | streetAddress = place.formattedAddress, selectedPlace = Just place } ! []
 
                     Err _ ->
                         model ! []
