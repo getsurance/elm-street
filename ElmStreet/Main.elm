@@ -1,11 +1,12 @@
-port module ElmStreet.Main exposing (..)
+port module ElmStreet.Main exposing (Model, Msg(..), addressDetails, addressPredictions, addressView, getAddressDetails, init, main, predictAddress, subscriptions, update, view)
 
-import Html exposing (Html, Attribute, button, div, text, program, input)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onClick)
-import Json.Decode as Decode
+import Browser
 import ElmStreet.AutocompletePrediction exposing (AutocompletePrediction)
-import ElmStreet.Place exposing (Place, ComponentType(..), getComponentName)
+import ElmStreet.Place exposing (ComponentType(..), Place, getComponentName)
+import Html exposing (Attribute, Html, button, div, input, text)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
+import Json.Decode as Decode
 
 
 type alias Model =
@@ -68,31 +69,41 @@ update msg model =
             ( { model | streetAddress = text }, predictAddress text )
 
         DidSelectAddress placeId ->
-            model ! [ getAddressDetails placeId ]
+            ( model
+            , getAddressDetails placeId
+            )
 
         AddressDetails placeJson ->
             let
                 decodedResult =
                     Decode.decodeString ElmStreet.Place.decoder placeJson
             in
-                case decodedResult of
-                    Ok place ->
-                        { model | streetAddress = place.formattedAddress, selectedPlace = Just place } ! []
+            case decodedResult of
+                Ok place ->
+                    ( { model | streetAddress = place.formattedAddress, selectedPlace = Just place }
+                    , Cmd.none
+                    )
 
-                    Err _ ->
-                        model ! []
+                Err _ ->
+                    ( model
+                    , Cmd.none
+                    )
 
         AddressPredictions predictions ->
             let
                 decodedResult =
                     Decode.decodeValue ElmStreet.AutocompletePrediction.decodeList predictions
             in
-                case decodedResult of
-                    Ok suggestions ->
-                        { model | suggestions = suggestions } ! []
+            case decodedResult of
+                Ok suggestions ->
+                    ( { model | suggestions = suggestions }
+                    , Cmd.none
+                    )
 
-                    Err _ ->
-                        model ! []
+                Err _ ->
+                    ( model
+                    , Cmd.none
+                    )
 
 
 subscriptions : Model -> Sub Msg
@@ -102,7 +113,7 @@ subscriptions model =
 
 main : Program Never Model Msg
 main =
-    program
+    Brower.element
         { init = init
         , view = view
         , update = update

@@ -1,4 +1,8 @@
-module ElmStreet.Place exposing (Place, LatLng, LatLngBounds, AddressComponent, ComponentType(..), Geometry, getComponentName, decoder)
+module ElmStreet.Place exposing
+    ( Place, LatLng, LatLngBounds, AddressComponent, Geometry, ComponentType(..)
+    , decoder
+    , getComponentName
+    )
 
 {-| Types for Google places api
 
@@ -20,9 +24,9 @@ module ElmStreet.Place exposing (Place, LatLng, LatLngBounds, AddressComponent, 
 -}
 
 import Dict exposing (Dict)
-import Json.Encode
 import Json.Decode
 import Json.Decode.Pipeline
+import Json.Encode
 
 
 {-| Type alias for [PlaceResult][pr]
@@ -148,21 +152,21 @@ type ComponentType
 -}
 decoder : Json.Decode.Decoder Place
 decoder =
-    Json.Decode.Pipeline.decode Place
+    Json.Decode.succeed Place
         |> Json.Decode.Pipeline.required "address_components" (Json.Decode.list decodeAddressComponent)
-        |> Json.Decode.Pipeline.required "adr_address" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "formatted_address" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "geometry" (decodeGeometry)
-        |> Json.Decode.Pipeline.required "icon" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "id" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "name" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "place_id" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "reference" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "scope" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "adr_address" Json.Decode.string
+        |> Json.Decode.Pipeline.required "formatted_address" Json.Decode.string
+        |> Json.Decode.Pipeline.required "geometry" decodeGeometry
+        |> Json.Decode.Pipeline.required "icon" Json.Decode.string
+        |> Json.Decode.Pipeline.required "id" Json.Decode.string
+        |> Json.Decode.Pipeline.required "name" Json.Decode.string
+        |> Json.Decode.Pipeline.required "place_id" Json.Decode.string
+        |> Json.Decode.Pipeline.required "reference" Json.Decode.string
+        |> Json.Decode.Pipeline.required "scope" Json.Decode.string
         |> Json.Decode.Pipeline.required "types" (Json.Decode.list Json.Decode.string)
-        |> Json.Decode.Pipeline.required "url" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "utc_offset" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "vicinity" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "url" Json.Decode.string
+        |> Json.Decode.Pipeline.required "utc_offset" Json.Decode.int
+        |> Json.Decode.Pipeline.required "vicinity" Json.Decode.string
 
 
 {-| Helper function to name by components type.
@@ -216,33 +220,33 @@ componentTypeList =
 
 decodeAddressComponent : Json.Decode.Decoder AddressComponent
 decodeAddressComponent =
-    Json.Decode.Pipeline.decode AddressComponent
-        |> Json.Decode.Pipeline.required "long_name" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "short_name" (Json.Decode.string)
+    Json.Decode.succeed AddressComponent
+        |> Json.Decode.Pipeline.required "long_name" Json.Decode.string
+        |> Json.Decode.Pipeline.required "short_name" Json.Decode.string
         |> Json.Decode.Pipeline.required "types" typeListDecoder
 
 
 decodeLatLng : Json.Decode.Decoder LatLng
 decodeLatLng =
-    Json.Decode.Pipeline.decode LatLng
-        |> Json.Decode.Pipeline.required "lat" (Json.Decode.float)
-        |> Json.Decode.Pipeline.required "lng" (Json.Decode.float)
+    Json.Decode.succeed LatLng
+        |> Json.Decode.Pipeline.required "lat" Json.Decode.float
+        |> Json.Decode.Pipeline.required "lng" Json.Decode.float
 
 
 decodeLatLngBounds : Json.Decode.Decoder LatLngBounds
 decodeLatLngBounds =
-    Json.Decode.Pipeline.decode LatLngBounds
-        |> Json.Decode.Pipeline.required "south" (Json.Decode.float)
-        |> Json.Decode.Pipeline.required "west" (Json.Decode.float)
-        |> Json.Decode.Pipeline.required "north" (Json.Decode.float)
-        |> Json.Decode.Pipeline.required "east" (Json.Decode.float)
+    Json.Decode.succeed LatLngBounds
+        |> Json.Decode.Pipeline.required "south" Json.Decode.float
+        |> Json.Decode.Pipeline.required "west" Json.Decode.float
+        |> Json.Decode.Pipeline.required "north" Json.Decode.float
+        |> Json.Decode.Pipeline.required "east" Json.Decode.float
 
 
 decodeGeometry : Json.Decode.Decoder Geometry
 decodeGeometry =
-    Json.Decode.Pipeline.decode Geometry
-        |> Json.Decode.Pipeline.required "location" (decodeLatLng)
-        |> Json.Decode.Pipeline.required "viewport" (decodeLatLngBounds)
+    Json.Decode.succeed Geometry
+        |> Json.Decode.Pipeline.required "location" decodeLatLng
+        |> Json.Decode.Pipeline.required "viewport" decodeLatLngBounds
 
 
 typeListDecoder : Json.Decode.Decoder (List ComponentType)

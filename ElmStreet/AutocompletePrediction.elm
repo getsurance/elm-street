@@ -1,4 +1,7 @@
-module ElmStreet.AutocompletePrediction exposing (AutocompletePrediction, StructuredFormatting, PredictionTerm, PredictionSubstring, decoder, decodeList)
+module ElmStreet.AutocompletePrediction exposing
+    ( AutocompletePrediction, StructuredFormatting, PredictionTerm, PredictionSubstring
+    , decoder, decodeList
+    )
 
 {-| Type aliases for Google Autocomplete api
 
@@ -14,9 +17,9 @@ module ElmStreet.AutocompletePrediction exposing (AutocompletePrediction, Struct
 
 -}
 
-import Json.Encode
 import Json.Decode
 import Json.Decode.Pipeline
+import Json.Encode
 
 
 {-| Type alias for objects of type [AutcompletePrediction][ap]
@@ -87,34 +90,34 @@ decodeList =
 -}
 decoder : Json.Decode.Decoder AutocompletePrediction
 decoder =
-    Json.Decode.Pipeline.decode AutocompletePrediction
-        |> Json.Decode.Pipeline.required "description" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "id" (Json.Decode.string)
+    Json.Decode.succeed AutocompletePrediction
+        |> Json.Decode.Pipeline.required "description" Json.Decode.string
+        |> Json.Decode.Pipeline.required "id" Json.Decode.string
         |> Json.Decode.Pipeline.required "matched_substrings" (Json.Decode.list decodePredictionSubstring)
-        |> Json.Decode.Pipeline.required "place_id" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "reference" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "structured_formatting" (decodeStructuredFormatting)
+        |> Json.Decode.Pipeline.required "place_id" Json.Decode.string
+        |> Json.Decode.Pipeline.required "reference" Json.Decode.string
+        |> Json.Decode.Pipeline.required "structured_formatting" decodeStructuredFormatting
         |> Json.Decode.Pipeline.required "terms" (Json.Decode.list decodePredictionTerm)
         |> Json.Decode.Pipeline.required "types" (Json.Decode.list Json.Decode.string)
 
 
 decodePredictionTerm : Json.Decode.Decoder PredictionTerm
 decodePredictionTerm =
-    Json.Decode.Pipeline.decode PredictionTerm
-        |> Json.Decode.Pipeline.required "offset" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "value" (Json.Decode.string)
+    Json.Decode.succeed PredictionTerm
+        |> Json.Decode.Pipeline.required "offset" Json.Decode.int
+        |> Json.Decode.Pipeline.required "value" Json.Decode.string
 
 
 decodePredictionSubstring : Json.Decode.Decoder PredictionSubstring
 decodePredictionSubstring =
-    Json.Decode.Pipeline.decode PredictionSubstring
-        |> Json.Decode.Pipeline.required "length" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "offset" (Json.Decode.int)
+    Json.Decode.succeed PredictionSubstring
+        |> Json.Decode.Pipeline.required "length" Json.Decode.int
+        |> Json.Decode.Pipeline.required "offset" Json.Decode.int
 
 
 decodeStructuredFormatting : Json.Decode.Decoder StructuredFormatting
 decodeStructuredFormatting =
-    Json.Decode.Pipeline.decode StructuredFormatting
-        |> Json.Decode.Pipeline.required "main_text" (Json.Decode.string)
+    Json.Decode.succeed StructuredFormatting
+        |> Json.Decode.Pipeline.required "main_text" Json.Decode.string
         |> Json.Decode.Pipeline.required "main_text_matched_substrings" (Json.Decode.list decodePredictionSubstring)
-        |> Json.Decode.Pipeline.required "secondary_text" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "secondary_text" Json.Decode.string
