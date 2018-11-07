@@ -3,7 +3,7 @@ module Main exposing (Model, Msg(..), addressView, init, main, subscriptions, up
 import Browser
 import ElmStreet.AutocompletePrediction exposing (AutocompletePrediction)
 import ElmStreet.Place exposing (ComponentType(..), Place, getComponentName)
-import Html exposing (Attribute, Html, button, div, input, text)
+import Html exposing (Attribute, Html, button, div, img, input, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as Decode
@@ -35,14 +35,17 @@ view model =
         [ div []
             [ case model.selectedPlace of
                 Just place ->
-                    getComponentName place Locality |> Maybe.withDefault "No city for this place" |> text
+                    getComponentName place Locality
+                        |> Maybe.withDefault "none"
+                        |> String.append "Selected city: "
+                        |> text
 
                 Nothing ->
-                    text "Select a place"
+                    text ""
             ]
-        , div [] [ text "Input address" ]
         , input [ placeholder "Address", value model.streetAddress, onInput ChangeAddr ] []
         , div [] (List.map addressView model.suggestions)
+        , img [ src "https://developers.google.com/places/documentation/images/powered-by-google-on-white.png" ] []
         ]
 
 
