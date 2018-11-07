@@ -1,4 +1,4 @@
-port module ElmStreet.Main exposing (Model, Msg(..), addressDetails, addressPredictions, addressView, getAddressDetails, init, main, predictAddress, subscriptions, update, view)
+module Main exposing (Model, Msg(..), addressView, init, main, subscriptions, update, view)
 
 import Browser
 import ElmStreet.AutocompletePrediction exposing (AutocompletePrediction)
@@ -7,6 +7,7 @@ import Html exposing (Attribute, Html, button, div, input, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as Decode
+import Ports exposing (..)
 
 
 type alias Model =
@@ -19,18 +20,6 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     ( Model "" [] Nothing, Cmd.none )
-
-
-port predictAddress : String -> Cmd msg
-
-
-port addressPredictions : (Decode.Value -> msg) -> Sub msg
-
-
-port getAddressDetails : String -> Cmd msg
-
-
-port addressDetails : (String -> msg) -> Sub msg
 
 
 type Msg
@@ -70,7 +59,7 @@ update msg model =
 
         DidSelectAddress placeId ->
             ( model
-            , getAddressDetails placeId
+            , getPredictionDetails placeId
             )
 
         AddressDetails placeJson ->
@@ -111,10 +100,10 @@ subscriptions model =
     Sub.batch [ addressPredictions AddressPredictions, addressDetails AddressDetails ]
 
 
-main : Program Never Model Msg
+main : Program Decode.Value Model Msg
 main =
-    Brower.element
-        { init = init
+    Browser.element
+        { init = always init
         , view = view
         , update = update
         , subscriptions = subscriptions
