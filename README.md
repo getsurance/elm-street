@@ -1,7 +1,10 @@
 
-# Markdown in Elm
+# elm-street
 
-Types for Google Places Autocomplete javascript api.
+Type alias in Elm for [Google Places Autocomplete javascript api](https://developers.google.com/maps/documentation/javascript/places). 
+
+Be sure to follow [Google Places policies](https://developers.google.com/places/web-service/policies) when using this library.
+
 
 ## Basic Usage
 
@@ -27,7 +30,7 @@ app.ports.predictAddress.subscribe(function(text) {
 Decode prediction using elm-street inside Elm:
 ```elm
 decodedResult =
-    Json.Decode.decodeValue (Json.Decode.list ElmStreet.AutocompletePrediction.decoder) predictions
+    Json.Decode.decodeValue (ElmStreet.AutocompletePrediction.decodeList) predictions
 ```
 
 ## Policies
@@ -37,13 +40,23 @@ Please follow the Google Places API when using this package:
 
 ## Examples
 
-This repo contains an example showing how to use the package.
+This project contains an example showing how to use the package.
 
-Just compile Main.elm, serve and open index.html.
+To compile to example:
+
+```
+cd Example
+elm make Main.elm --output main.js
+```
+
+Serve and open index.html.
 
 ## Todo
 - [x] Create decoders for autocomplete response object inside Elm
-- [ ] Decode AddressComponents into fixed types instead of a list, making impossible states impossible
 - [ ] Add a autocomplete dropdown as UI element
-- [ ] Pass service options from Elm to Google api
+- [ ] Pass service options from inside Elm
+- [ ] Decode AddressComponents into fixed types instead of a list, making impossible states impossible
 
+## Acknowledgement
+
+Thanks [labzero/elm-google-geocoding](https://github.com/labzero/elm-google-geocoding) for the inspiration for this package.
