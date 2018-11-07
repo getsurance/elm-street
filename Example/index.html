@@ -3,19 +3,21 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTGFwI-OXNVmj6R2iVLjipaUotFMyyDyo&libraries=places"></script>
 <script>    
     var node = document.getElementById('elm');
-    var app = Elm.ElmStreet.Main.embed(node);
+    console.log(Elm.Main);
+    var app = Elm.Main.init({node: node, flags: {}});
 
     app.ports.predictAddress.subscribe(function(text) {
       if(!text) { return; }
       var service = new google.maps.places.AutocompleteService();
       var options = { input: text, componentRestrictions: {country: "de"}, types: ['address'] }
       service.getPlacePredictions(options, function(predictions, status) {
+        console.log(predictions);
         app.ports.addressPredictions.send(predictions);
       });
     });
-
-
-    app.ports.getAddressDetails.subscribe(function(text) {
+    
+    
+    app.ports.getPredictionDetails.subscribe(function(text) {
       var request = { placeId: text };
       var service = new google.maps.places.PlacesService(document.createElement('div'));
       service.getDetails(request, function(place, status) {

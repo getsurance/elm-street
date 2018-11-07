@@ -1,11 +1,13 @@
-port module ElmStreet.Main exposing (..)
+module Main exposing (Model, Msg(..), addressView, init, main, subscriptions, update, view)
 
-import Html exposing (Html, Attribute, button, div, text, program, input)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onClick)
-import Json.Decode as Decode
+import Browser
 import ElmStreet.AutocompletePrediction exposing (AutocompletePrediction)
-import ElmStreet.Place exposing (Place, ComponentType(..), getComponentName)
+import ElmStreet.Place exposing (ComponentType(..), Place, getComponentName)
+import Html exposing (Attribute, Html, button, div, img, input, text)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
+import Json.Decode as Decode
+import Ports exposing (..)
 
 
 type alias Model =
@@ -18,18 +20,6 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     ( Model "" [] Nothing, Cmd.none )
-
-
-port predictAddress : String -> Cmd msg
-
-
-port addressPredictions : (Decode.Value -> msg) -> Sub msg
-
-
-port getAddressDetails : String -> Cmd msg
-
-
-port addressDetails : (String -> msg) -> Sub msg
 
 
 type Msg
@@ -45,14 +35,17 @@ view model =
         [ div []
             [ case model.selectedPlace of
                 Just place ->
-                    getComponentName place Locality |> Maybe.withDefault "No city for this place" |> text
+                    getComponentName place Locality
+                        |> Maybe.withDefault "none"
+                        |> String.append "Selected city: "
+                        |> text
 
                 Nothing ->
-                    text "Select a place"
+                    text ""
             ]
-        , div [] [ text "Input address" ]
         , input [ placeholder "Address", value model.streetAddress, onInput ChangeAddr ] []
         , div [] (List.map addressView model.suggestions)
+        , img [ src "https://developers.google.com/places/documentation/images/powered-by-google-on-white.png" ] []
         ]
 
 
@@ -68,31 +61,41 @@ update msg model =
             ( { model | streetAddress = text }, predictAddress text )
 
         DidSelectAddress placeId ->
-            model ! [ getAddressDetails placeId ]
+            ( model
+            , getPredictionDetails placeId
+            )
 
         AddressDetails placeJson ->
             let
                 decodedResult =
                     Decode.decodeString ElmStreet.Place.decoder placeJson
             in
-                case decodedResult of
-                    Ok place ->
-                        { model | streetAddress = place.formattedAddress, selectedPlace = Just place } ! []
+            case decodedResult of
+                Ok place ->
+                    ( { model | streetAddress = place.formattedAddress, selectedPlace = Just place }
+                    , Cmd.none
+                    )
 
-                    Err _ ->
-                        model ! []
+                Err _ ->
+                    ( model
+                    , Cmd.none
+                    )
 
         AddressPredictions predictions ->
             let
                 decodedResult =
                     Decode.decodeValue ElmStreet.AutocompletePrediction.decodeList predictions
             in
-                case decodedResult of
-                    Ok suggestions ->
-                        { model | suggestions = suggestions } ! []
+            case decodedResult of
+                Ok suggestions ->
+                    ( { model | suggestions = suggestions }
+                    , Cmd.none
+                    )
 
-                    Err _ ->
-                        model ! []
+                Err _ ->
+                    ( model
+                    , Cmd.none
+                    )
 
 
 subscriptions : Model -> Sub Msg
@@ -100,10 +103,10 @@ subscriptions model =
     Sub.batch [ addressPredictions AddressPredictions, addressDetails AddressDetails ]
 
 
-main : Program Never Model Msg
+main : Program Decode.Value Model Msg
 main =
-    program
-        { init = init
+    Browser.element
+        { init = always init
         , view = view
         , update = update
         , subscriptions = subscriptions
