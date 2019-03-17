@@ -48,7 +48,7 @@ type alias Place =
     , types : List String
     , url : String
     , utcOffset : Int
-    , vicinity : String
+    , vicinity : Maybe String
     }
 
 
@@ -166,7 +166,7 @@ decoder =
         |> Json.Decode.Pipeline.required "types" (Json.Decode.list Json.Decode.string)
         |> Json.Decode.Pipeline.required "url" Json.Decode.string
         |> Json.Decode.Pipeline.required "utc_offset" Json.Decode.int
-        |> Json.Decode.Pipeline.required "vicinity" Json.Decode.string
+        |> Json.Decode.Pipeline.optional "vicinity" (Json.Decode.nullable Json.Decode.string) Nothing
 
 
 {-| Helper function to name by components type.
