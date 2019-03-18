@@ -3,7 +3,7 @@
     "name": "getsurance/elm-street",
     "summary": "Types for Google Places Autocomplete javascript api",
     "license": "BSD-3-Clause",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "source-directories": [
         "src"
     ],
