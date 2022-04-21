@@ -4,9 +4,6 @@
     "summary": "Types for Google Places Autocomplete javascript api",
     "license": "BSD-3-Clause",
     "version": "2.0.0",
-    "source-directories": [
-        "src"
-    ],
     "exposed-modules": [
         "ElmStreet.AutocompletePrediction",
         "ElmStreet.Place"
@@ -15,7 +12,6 @@
     "dependencies": {
         "NoRedInk/elm-json-decode-pipeline": "1.0.0 <= v < 2.0.0",
         "elm/core": "1.0.0 <= v < 2.0.0",
-        "elm/html": "1.0.0 <= v < 2.0.0",
         "elm/json": "1.0.0 <= v < 2.0.0"
     },
     "test-dependencies": {}
